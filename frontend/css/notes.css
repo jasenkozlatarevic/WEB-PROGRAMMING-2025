@@ -1,0 +1,50 @@
+body {
+    background-color: #f8f9fa;
+    font-family: Arial, sans-serif;
+}
+.note-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.note-card h5 {
+    color: #333333;
+    margin-bottom: 8px;
+}
+.note-card p {
+    color: #666666;
+}
+.note-card .meta {
+    color: #999999;
+    font-size: 0.9em;
+    margin-top: 8px;
+}
+.form-container {
+    background-color: #ffffff;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+}
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+.nav-tabs {
+    margin-bottom: 16px;
+}
+.nav-tabs .nav-link {
+    border: none;
+    color: #666666;
+}
+.nav-tabs .nav-link.active {
+    color: #28a745;
+    border-bottom: 2px solid #28a745;
+}
