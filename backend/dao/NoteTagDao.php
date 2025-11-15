@@ -1,30 +1,23 @@
 <?php
-// backend/dao/NoteTagDao.php
-require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/BaseDao.php';
 
-class NoteTagDao {
-    private $conn;
-    public function __construct() { global $conn; $this->conn = $conn; }
+class NoteTagDao extends BaseDao {
+    protected $table = 'note_tag';
+    protected $fillable = ['note_id', 'tag_id'];
 
     public function getAll() {
-        $stmt = $this->conn->prepare("SELECT * FROM note_tag");
-        $stmt->execute();
-        return $stmt->fetchAll();
+        return $this->findAll('*');
     }
 
     public function getById($id) {
-        $stmt = $this->conn->prepare("SELECT * FROM note_tag WHERE id=?");
-        $stmt->execute([$id]);
-        return $stmt->fetch();
+        return $this->findById($id, '*');
     }
 
     public function add($data) {
-        $stmt = $this->conn->prepare("INSERT INTO note_tag (note_id, tag_id) VALUES (?, ?)");
-        return $stmt->execute([$data['note_id'] ?? null, $data['tag_id'] ?? null]);
+        return $this->insert($data);
     }
 
     public function delete($id) {
-        $stmt = $this->conn->prepare("DELETE FROM note_tag WHERE id=?");
-        return $stmt->execute([$id]);
+        return $this->deleteById($id);
     }
 }
