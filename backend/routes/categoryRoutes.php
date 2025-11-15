@@ -1,32 +1,46 @@
 <?php
-require_once __DIR__ . '/../dao/CategoryDao.php';
+require_once __DIR__ . '/../services/CategoryService.php';
 
-Flight::route('GET /categories', function() {
-    $dao = new CategoryDao();
-    Flight::json($dao->getAll());
+$categoryService = new CategoryService();
+
+Flight::route('GET /categories', function () use ($categoryService) {
+    Flight::json($categoryService->getAllCategories());
 });
 
-Flight::route('GET /categories/@id', function($id) {
-    $dao = new CategoryDao();
-    Flight::json($dao->getById($id));
+Flight::route('GET /categories/@id', function ($id) use ($categoryService) {
+    try {
+        $cat = $categoryService->getCategoryById($id);
+        Flight::json($cat);
+    } catch (Exception $e) {
+        Flight::halt(400, json_encode(['error' => $e->getMessage()]));
+    }
 });
 
-Flight::route('POST /categories', function() {
+Flight::route('POST /categories', function () use ($categoryService) {
     $data = get_request_data();
-    $dao = new CategoryDao();
-    $dao->add($data);
-    Flight::json(['message' => 'Category created']);
+    try {
+        $id = $categoryService->createCategory($data);
+        Flight::json(['message' => 'Category created', 'id' => $id]);
+    } catch (Exception $e) {
+        Flight::halt(400, json_encode(['error' => $e->getMessage()]));
+    }
 });
 
-Flight::route('PUT|PATCH /categories/@id', function($id) {
+Flight::route('PUT /categories/@id', function ($id) use ($categoryService) {
     $data = get_request_data();
-    $dao = new CategoryDao();
-    $dao->update($id, $data);
-    Flight::json(['message' => 'Category updated']);
+    try {
+        $categoryService->updateCategory($id, $data);
+        Flight::json(['message' => 'Category updated']);
+    } catch (Exception $e) {
+        Flight::halt(400, json_encode(['error' => $e->getMessage()]));
+    }
 });
 
-Flight::route('DELETE /categories/@id', function($id) {
-    $dao = new CategoryDao();
-    $dao->delete($id);
-    Flight::json(['message' => 'Category deleted']);
+Flight::route('DELETE /categories/@id', function ($id) use ($categoryService) {
+    try {
+        $categoryService->deleteCategory($id);
+        Flight::json(['message' => 'Category deleted']);
+    } catch (Exception $e) {
+        Flight::halt(400, json_encode(['error' => $e->getMessage()]));
+    }
 });

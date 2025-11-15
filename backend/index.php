@@ -1,38 +1,64 @@
 <?php
-// backend/index.php
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
-
-require __DIR__ . '/vendor/autoload.php'; // assumes Flight via Composer; adjust if needed
+require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/config.php';
 
-// Helper to get JSON or form data uniformly
+Flight::set('flight.log_errors', true);
+
+/**
+ * Helper za čitanje JSON body-a
+ */
 function get_request_data() {
     $raw = file_get_contents('php://input');
-    $data = [];
-    if (!empty($raw)) {
-        $json = json_decode($raw, true);
-        if (json_last_error() === JSON_ERROR_NONE) {
-            $data = $json;
-        }
+    $data = json_decode($raw, true);
+    if ($data === null) {
+        $data = $_POST;
     }
-    if (empty($data) && isset($GLOBALS['__flightRequest'])) {
-        // Fallback if Flight::request()->data is configured
-        $data = \Flight::request()->data->getData();
-    }
-    return $data ?: [];
+    return $data;
 }
 
-// Register a simple DI for PDO
-Flight::set('pdo', $conn);
+/**
+ * ROUTES
+ */
+require_once __DIR__ . '/routes/userRoutes.php';
+require_once __DIR__ . '/routes/categoryRoutes.php';
+require_once __DIR__ . '/routes/noteRoutes.php';
+require_once __DIR__ . '/routes/tagRoutes.php';
+require_once __DIR__ . '/routes/noteTagRoutes.php';
 
-// Include routes
-require __DIR__ . '/routes/userRoutes.php';
-require __DIR__ . '/routes/categoryRoutes.php';
-require __DIR__ . '/routes/noteRoutes.php';
-require __DIR__ . '/routes/tagRoutes.php';
-require __DIR__ . '/routes/noteTagRoutes.php';
+/**
+ * OpenAPI JSON
+ */
+Flight::route('GET /openapi', function () {
+    header('Content-Type: application/json');
+    readfile(__DIR__ . '/docs/openapi.json');
+});
+
+/**
+ * Swagger UI dokumentacija
+ */
+Flight::route('GET /docs', function () {
+    ?>
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Notes App API Docs</title>
+        <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+    </head>
+    <body>
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+    <script>
+      window.onload = () => {
+        SwaggerUIBundle({
+          url: "/openapi",
+          dom_id: '#swagger-ui'
+        });
+      };
+    </script>
+    </body>
+    </html>
+    <?php
+});
 
 Flight::start();

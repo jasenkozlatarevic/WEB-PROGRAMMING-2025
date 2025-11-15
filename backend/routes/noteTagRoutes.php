@@ -1,25 +1,36 @@
 <?php
-require_once __DIR__ . '/../dao/NoteTagDao.php';
+require_once __DIR__ . '/../services/NoteTagService.php';
 
-Flight::route('GET /note-tags', function() {
-    $dao = new NoteTagDao();
-    Flight::json($dao->getAll());
+$noteTagService = new NoteTagService();
+
+Flight::route('GET /note-tags', function () use ($noteTagService) {
+    Flight::json($noteTagService->getAllNoteTags());
 });
 
-Flight::route('GET /note-tags/@id', function($id) {
-    $dao = new NoteTagDao();
-    Flight::json($dao->getById($id));
+Flight::route('GET /note-tags/@id', function ($id) use ($noteTagService) {
+    try {
+        $nt = $noteTagService->getNoteTagById($id);
+        Flight::json($nt);
+    } catch (Exception $e) {
+        Flight::halt(400, json_encode(['error' => $e->getMessage()]));
+    }
 });
 
-Flight::route('POST /note-tags', function() {
+Flight::route('POST /note-tags', function () use ($noteTagService) {
     $data = get_request_data();
-    $dao = new NoteTagDao();
-    $dao->add($data);
-    Flight::json(['message' => 'Note-Tag relation created']);
+    try {
+        $id = $noteTagService->createNoteTag($data);
+        Flight::json(['message' => 'NoteTag created', 'id' => $id]);
+    } catch (Exception $e) {
+        Flight::halt(400, json_encode(['error' => $e->getMessage()]));
+    }
 });
 
-Flight::route('DELETE /note-tags/@id', function($id) {
-    $dao = new NoteTagDao();
-    $dao->delete($id);
-    Flight::json(['message' => 'Note-Tag relation deleted']);
+Flight::route('DELETE /note-tags/@id', function ($id) use ($noteTagService) {
+    try {
+        $noteTagService->deleteNoteTag($id);
+        Flight::json(['message' => 'NoteTag deleted']);
+    } catch (Exception $e) {
+        Flight::halt(400, json_encode(['error' => $e->getMessage()]));
+    }
 });
