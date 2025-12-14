@@ -33,6 +33,10 @@ Flight::route('GET /openapi', function () {
     readfile(__DIR__ . '/docs/openapi.json');
 });
 
+Flight::route('GET /docs', function () {
+  include __DIR__ . '/docs/swagger.php';
+});
+
 /**
  * Swagger UI dokumentacija
  */

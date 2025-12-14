@@ -1,6 +1,5 @@
 <?php
 // backend/config.php
-// Update credentials as needed.
 $host = getenv('DB_HOST') ?: 'localhost';
 $db   = getenv('DB_NAME') ?: 'notes_app';
 $user = getenv('DB_USER') ?: 'root';
