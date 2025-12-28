@@ -1,7 +1,5 @@
 body {
   font-family: Arial, sans-serif;
-  
-  
 }
 .navbar {
   background: linear-gradient(135deg, #6a11cb, #2575fc);
@@ -26,4 +24,39 @@ body {
 }
 .navbar-toggler-icon {
   background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255, 255, 255, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+/* ===== TOASTR CUSTOM COLORS ===== */
+
+/* SUCCESS */
+#toast-container > .toast-success {
+  background-color: #198754 !important; /* bootstrap green */
+  color: #ffffff !important;
+}
+
+/* ERROR */
+#toast-container > .toast-error {
+  background-color: #dc3545 !important; /* bootstrap red */
+  color: #ffffff !important;
+}
+
+/* INFO */
+#toast-container > .toast-info {
+  background-color: #0dcaf0 !important; /* bootstrap info */
+  color: #000000 !important;
+}
+
+/* WARNING */
+#toast-container > .toast-warning {
+  background-color: #ffc107 !important; /* bootstrap warning */
+  color: #000000 !important;
+}
+
+/* TITLE */
+#toast-container .toast-title {
+  font-weight: bold;
+}
+
+/* MESSAGE */
+#toast-container .toast-message {
+  font-size: 14px;
 }

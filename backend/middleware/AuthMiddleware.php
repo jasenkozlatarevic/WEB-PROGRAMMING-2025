@@ -1,0 +1,58 @@
+<?php
+
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+class AuthMiddleware {
+
+    public function verifyToken($token) {
+        if (!$token) {
+            Flight::halt(401, "Missing Authorization header");
+        }
+
+        $decoded_token = JWT::decode(
+            $token,
+            new Key(Config::JWT_SECRET(), 'HS256')
+        );
+
+        Flight::set('user', $decoded_token->user);
+        Flight::set('jwt_token', $token);
+
+        return true;
+    }
+
+    public function authorizeRole($requiredRole) {
+        if (!Flight::get('user')) {
+            $auth = Flight::request()->getHeader('Authorization');
+
+            if (!$auth) {
+                Flight::halt(401, "Missing Authorization header");
+            }
+
+            $token = str_replace("Bearer ", "", $auth);
+            $this->verifyToken($token);
+        }
+
+        $user = Flight::get('user');
+
+        if ($user->role !== $requiredRole) {
+            Flight::halt(403, 'Access denied: insufficient privileges');
+        }
+    }
+
+    public function authorizeRoles($roles) {
+        $user = Flight::get('user');
+
+        if (!in_array($user->role, $roles)) {
+            Flight::halt(403, 'Forbidden: role not allowed');
+        }
+    }
+
+    public function authorizePermission($permission) {
+        $user = Flight::get('user');
+
+        if (!in_array($permission, $user->permissions)) {
+            Flight::halt(403, 'Access denied: permission missing');
+        }
+    }
+}

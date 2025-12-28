@@ -1,24 +1,21 @@
-    <section class="container mt-5">
-        <h2 class="mb-4">Your Notes</h2>
+<div class="container mt-4">
+  <h3>Add note</h3>
 
-        <!-- FORM FOR ADDING NOTES -->
-        <form id="addNoteForm" class="mb-4">
-            <div class="mb-3">
-                <label for="noteTitle" class="form-label">Title</label>
-                <input type="text" class="form-control" id="noteTitle" placeholder="Note title..." required />
-            </div>
-            <div class="mb-3">
-                <label for="noteContent" class="form-label">Content</label>
-                <textarea class="form-control" id="noteContent" rows="4" placeholder="Write something..." required></textarea>
-            </div>
-            <button type="submit" class="btn btn-success">Add Note</button>
-        </form>
+  <form id="addNoteForm">
+    <div class="mb-2">
+      <input id="noteTitle" class="form-control" placeholder="Title" required>
+    </div>
 
-        <!-- NOTES LIST -->
-        <div id="notesList" class="row gy-3">
-            <div class="col-12 text-muted">
-                <em>No notes yet. Add your first one above.</em>
-            </div>
-        </div>
-    </section>
-    <script src="js/main.js"></script>
+    <div class="mb-2">
+      <textarea id="noteContent" class="form-control" placeholder="Content" required></textarea>
+    </div>
+
+    <button type="button" onclick="NotesService.addNoteFromForm()" class="btn btn-primary">
+      Add note
+    </button>
+  </form>
+
+  <hr>
+
+  <div id="notesList"></div>
+</div>
