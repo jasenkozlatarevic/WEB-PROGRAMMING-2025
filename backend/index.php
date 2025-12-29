@@ -1,68 +1,81 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/config.php';
 
-Flight::set('flight.log_errors', true);
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
-/**
- * Helper za čitanje JSON body-a
- */
-function get_request_data() {
-    $raw = file_get_contents('php://input');
-    $data = json_decode($raw, true);
-    if ($data === null) {
-        $data = $_POST;
-    }
-    return $data;
+/* ================= CORS ================= */
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
 }
 
-/**
- * ROUTES
- */
-require_once __DIR__ . '/routes/userRoutes.php';
-require_once __DIR__ . '/routes/categoryRoutes.php';
-require_once __DIR__ . '/routes/noteRoutes.php';
-require_once __DIR__ . '/routes/tagRoutes.php';
-require_once __DIR__ . '/routes/noteTagRoutes.php';
+/* ================= SERVICES ================= */
+require_once __DIR__ . '/rest/services/BaseService.php';
+require_once __DIR__ . '/rest/services/UserService.php';
+require_once __DIR__ . '/rest/services/AuthService.php';
+require_once __DIR__ . '/rest/services/NoteService.php';
+require_once __DIR__ . '/middleware/AuthMiddleware.php';
 
-/**
- * OpenAPI JSON
- */
+Flight::register('users_service', 'UserService');
+Flight::register('auth_service', 'AuthService');
+Flight::register('note_service', 'NoteService');
+
+Flight::map('auth_middleware', function () {
+    return new AuthMiddleware();
+});
+
+/* ================= GLOBAL AUTH ================= */
+Flight::route('/*', function () {
+
+    $url = Flight::request()->url;
+
+    // JAVNE RUTE (BEZ JWT-a)
+    if (
+        str_contains($url, '/auth/login') ||
+        str_contains($url, '/auth/register') ||
+        str_contains($url, '/openapi') ||
+        str_contains($url, '/swagger') ||
+        str_contains($url, '/public/v1/docs')
+    ) {
+        return true;
+    }
+
+    $auth = Flight::request()->getHeader("Authorization");
+
+    if (!$auth) {
+        Flight::halt(401, "Missing Authorization header");
+    }
+
+    $token = str_replace("Bearer ", "", $auth);
+
+    try {
+        Flight::auth_middleware()->verifyToken($token);
+    } catch (Exception $e) {
+        Flight::halt(401, $e->getMessage());
+    }
+});
+
+/* ================= ROUTES ================= */
+require_once __DIR__ . '/rest/routes/AuthRoutes.php';
+require_once __DIR__ . '/rest/routes/UserRoutes.php';
+require_once __DIR__ . '/rest/routes/NoteRoutes.php';
+
+/* ================= OPENAPI JSON ================= */
 Flight::route('GET /openapi', function () {
     header('Content-Type: application/json');
-    readfile(__DIR__ . '/docs/openapi.json');
+    readfile(__DIR__ . '/openapi.json');
 });
 
-Flight::route('GET /docs', function () {
-  include __DIR__ . '/docs/swagger.php';
+/* ================= SWAGGER UI ================= */
+Flight::route('GET /swagger', function () {
+    require __DIR__ . '/public/v1/docs/index.php';
 });
 
-/**
- * Swagger UI dokumentacija
- */
-Flight::route('GET /docs', function () {
-    ?>
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Notes App API Docs</title>
-        <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
-    </head>
-    <body>
-    <div id="swagger-ui"></div>
 
-    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
-    <script>
-      window.onload = () => {
-        SwaggerUIBundle({
-          url: "/openapi",
-          dom_id: '#swagger-ui'
-        });
-      };
-    </script>
-    </body>
-    </html>
-    <?php
-});
-
+/* ================= START ================= */
 Flight::start();
